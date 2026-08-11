@@ -1,11 +1,20 @@
 import { sequelize } from '../sequelize';
 import { Member, initMember } from './member';
 import { Wallet, initWallet } from './wallet';
+import { FundingTransaction, initFundingTransaction } from './funding-transaction';
+import { WalletTx, initWalletTx } from './wallet-tx';
 
 initMember(sequelize);
 initWallet(sequelize);
+initFundingTransaction(sequelize);
+initWalletTx(sequelize);
 
 Member.hasOne(Wallet, { foreignKey: 'memberId', as: 'wallet' });
 Wallet.belongsTo(Member, { foreignKey: 'memberId', as: 'member' });
+Wallet.hasMany(FundingTransaction, { foreignKey: 'walletId', as: 'fundingTransactions' });
+FundingTransaction.belongsTo(Wallet, { foreignKey: 'walletId', as: 'wallet' });
+Wallet.hasMany(WalletTx, { foreignKey: 'walletId', as: 'walletTxs' });
+WalletTx.belongsTo(Wallet, { foreignKey: 'walletId', as: 'wallet' });
+WalletTx.belongsTo(FundingTransaction, { foreignKey: 'fundingTxId', as: 'fundingTx' });
 
-export { Member, Wallet };
+export { Member, Wallet, FundingTransaction, WalletTx };
