@@ -1,3 +1,24 @@
+# Submission notes
+
+The solution lives in [`starter/`](starter/). To run it:
+
+```bash
+cd starter && cp .env.example .env && npm install
+npm run db:up && npm test
+```
+
+Suggested reading order:
+
+1. [`starter/DECISIONS.md`](starter/DECISIONS.md) - locking strategy, schema choices, callback policies, stated assumptions, and what I would build next.
+2. [`starter/DESIGN-PSP.md`](starter/DESIGN-PSP.md) - Part B: the adapter boundary that makes the 50th PSP a one-day junior task.
+3. [`starter/test/concurrency-and-ledger-invariants.test.ts`](starter/test/concurrency-and-ledger-invariants.test.ts) - exactly-once crediting under concurrent callbacks, debit races, and the ledger reconstruction invariant.
+
+Commits follow the build order: schema first, then each flow, then the concurrency suite, then the design docs.
+
+The original challenge statement follows below.
+
+---
+
 # Backend Lead - Take-Home Challenge
 
 **Time budget: ~4 hours** (about 3h coding + 45 min for a short design note). We respect your time: when you hit the limit, stop and write down what you would do next in `DECISIONS.md`. An unfinished solution with clear reasoning beats a polished one that took two days.
