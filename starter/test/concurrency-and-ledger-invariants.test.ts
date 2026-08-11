@@ -65,6 +65,32 @@ describe('concurrent wagers', () => {
   });
 });
 
+describe('concurrent wager and withdrawal', () => {
+  it('cannot overdraw when a wager and a withdrawal race for the same funds', async () => {
+    const { memberId, walletId } = await createMemberWithWallet(app);
+    // Multiplier 0: no turnover requirement, so the withdrawal is unlocked and
+    // the race is purely over the balance.
+    await completeDeposit(app, memberId, '100.00', 0);
+
+    const [wager, withdrawal] = await Promise.all([
+      request(app).post(`/wallets/${walletId}/wagers`).send({ amount: '60.00' }),
+      request(app).post('/withdrawals').send({ memberId, amount: '60.00' }),
+    ]);
+
+    // Either request may win the wallet lock; exactly one debit must go through.
+    const statuses = [wager.status, withdrawal.status].sort();
+    expect(statuses).toEqual([201, 422]);
+    expect(await getBalance(app, memberId)).toBe('40.000000000000000000');
+
+    const wallet = await Wallet.findByPk(walletId);
+    expect(dec(wallet!.balance).isNegative()).toBe(false);
+    const debits = await WalletTx.count({
+      where: { walletId, type: ['wager_debit', 'withdrawal_debit'] },
+    });
+    expect(debits).toBe(1);
+  });
+});
+
 describe('ledger reconstruction invariant', () => {
   it('keeps the wallet balance equal to the sum of ledger entries through a mixed flow', async () => {
     const { memberId, walletId } = await createMemberWithWallet(app);
