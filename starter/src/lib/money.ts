@@ -14,3 +14,10 @@ export function dec(value: string | number | BigNumber): BigNumber {
 }
 
 export const ZERO = dec(0);
+
+// Canonical wire format for money: full DECIMAL(36,18) scale, matching what
+// Postgres returns. Every API response carrying money should go through this
+// so clients always see the same shape regardless of which endpoint replied.
+export function toMoneyString(value: BigNumber): string {
+  return value.toFixed(18);
+}

@@ -1,6 +1,6 @@
 import { sequelize } from '../db/sequelize';
 import { FundingTransaction, Wallet, WalletTx } from '../db/models';
-import { dec } from '../lib/money';
+import { dec, toMoneyString } from '../lib/money';
 
 export class WalletNotFoundError extends Error {
   constructor() {
@@ -97,6 +97,6 @@ export async function requestWithdrawal(input: {
       { transaction: t },
     );
 
-    return { transactionId: fundingTx.id, balance: newBalance.toString() };
+    return { transactionId: fundingTx.id, balance: toMoneyString(newBalance) };
   });
 }

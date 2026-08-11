@@ -1,6 +1,6 @@
 import { sequelize } from '../db/sequelize';
 import { Wallet, WalletTx } from '../db/models';
-import { dec } from '../lib/money';
+import { dec, toMoneyString } from '../lib/money';
 
 export class WalletNotFoundError extends Error {
   constructor() {
@@ -64,6 +64,6 @@ export async function placeWager(input: {
       { transaction: t },
     );
 
-    return { balance: newBalance.toString() };
+    return { balance: toMoneyString(newBalance) };
   });
 }
