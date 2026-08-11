@@ -20,6 +20,19 @@ export async function createDeposit(
   return { transactionId: res.body.transactionId as string, pspRef: res.body.pspRef as string };
 }
 
+export async function completeDeposit(
+  app: Express,
+  memberId: string,
+  amount: string,
+  turnoverMultiplier = 1,
+) {
+  const deposit = await createDeposit(app, memberId, amount, turnoverMultiplier);
+  await request(app)
+    .post('/psp/callbacks')
+    .send({ pspRef: deposit.pspRef, status: 'completed', amount });
+  return deposit;
+}
+
 export async function getBalance(app: Express, memberId: string): Promise<string> {
   const res = await request(app).get(`/members/${memberId}/wallet`);
   return res.body.balance as string;
