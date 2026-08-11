@@ -21,7 +21,7 @@ type PspEvent = {
 };
 ```
 
-Quirks are absorbed at the edge: minor-unit amounts are converted in `normalize`; weird status vocabularies map to the canonical three; a PSP that sends `success` before `pending` is neutralized because the core's state machine is **monotonic** — once a funding transaction is terminal, later regressions are no-ops or 409s (already true today).
+Quirks are absorbed at the edge: minor-unit amounts are converted in `normalize`; weird status vocabularies map to the canonical three; a PSP that sends `success` before `pending` is neutralized because the core's state machine is **monotonic**: once a funding transaction is terminal, later regressions are no-ops or 409s (already true today).
 
 ## Routing & config
 
@@ -35,17 +35,17 @@ psps:
     amountUnits: minor
 ```
 
-Verification lives in `verify` (adapter) because schemes differ (HMAC header, signed body, mTLS). Normalization lives in `normalize`. Settlement — locking, idempotency, ledger, turnover — lives in the core and is written once, reviewed hard, and never touched during an integration.
+Verification lives in `verify` (adapter) because schemes differ (HMAC header, signed body, mTLS). Normalization lives in `normalize`. Settlement (locking, idempotency, ledger, turnover) lives in the core and is written once, reviewed hard, and never touched during an integration.
 
 ## Testing a provider you can't call in CI
 
-1. **Recorded fixtures**: real sandbox callbacks captured once (payload + headers + signature) and committed. CI replays them through the adapter — no network.
-2. **Shared contract suite**: every adapter must pass the same parametrized tests — valid callback normalizes correctly; tampered signature rejected; duplicate delivery; out-of-order statuses; garbage payload; minor/major unit conversion. A new adapter inherits ~all of its test coverage by filling in fixtures.
+1. **Recorded fixtures**: real sandbox callbacks captured once (payload + headers + signature) and committed. CI replays them through the adapter, no network needed.
+2. **Shared contract suite**: every adapter must pass the same parametrized tests: valid callback normalizes correctly; tampered signature rejected; duplicate delivery; out-of-order statuses; garbage payload; minor/major unit conversion. A new adapter inherits nearly all of its test coverage by filling in fixtures.
 3. Core settlement tests (already in `test/`) never change per PSP.
 
 ## Why a junior can do this safely
 
-The blast radius of an adapter is one provider's callbacks. They write `verify`, `normalize`, config, and fixtures; the contract suite tells them when they're done. They cannot touch the code that moves money — that boundary, not seniority, is the safety mechanism.
+The blast radius of an adapter is one provider's callbacks. They write `verify`, `normalize`, config, and fixtures; the contract suite tells them when they're done. They cannot touch the code that moves money. That boundary, not seniority, is the safety mechanism.
 
 ```mermaid
 flowchart LR
